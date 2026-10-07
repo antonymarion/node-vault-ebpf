@@ -1,0 +1,29 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  agent-binaries:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build agent image and extract binary
+        run: |
+          docker build -f docker/Dockerfile.agent -t nve-agent .
+          id=$(docker create nve-agent)
+          mkdir -p dist
+          docker cp "$id":/usr/local/bin/node-vault-ebpf-agent dist/
+          docker cp "$id":/opt/node-vault-ebpf/rewrite.bpf.o dist/
+          docker rm "$id"
+          tar -C dist -czf node-vault-ebpf-agent-linux-amd64.tar.gz \
+            node-vault-ebpf-agent rewrite.bpf.o
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: node-vault-ebpf-agent-linux-amd64.tar.gz
+          generate_release_notes: true

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="node-vault-ebpf">
+  <!-- Cornerstone mark (aligned with corner-stone.ai OSS card) -->
+  <rect width="128" height="128" rx="28" fill="#071428"/>
+  <circle cx="64" cy="64" r="34" fill="none" stroke="#D4A017" stroke-width="10"/>
+  <path
+    d="M64 42 L82 52.5 L82 73.5 L64 84 L46 73.5 L46 52.5 Z"
+    fill="none"
+    stroke="#E8EEF4"
+    stroke-width="3.5"
+    stroke-linejoin="round"
+  />
+  <!-- Cyan pointer at ~2 o'clock -->
+  <path
+    d="M93.5 34.5 L101.5 42.5 L93.5 50.5 L91 42.5 Z"
+    fill="#4ECDC4"
+  />
+</svg>

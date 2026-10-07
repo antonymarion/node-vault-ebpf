@@ -1,0 +1,56 @@
+{
+  "name": "node-vault-ebpf",
+  "version": "0.1.1",
+  "description": "Drop-in node-vault client that keeps secrets out of Node memory via an eBPF agent",
+  "main": "./dist/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src/index.d.ts",
+    "src/types.ts",
+    "src/client.ts",
+    "README.md",
+    "LICENSE",
+    "logo.svg",
+    "logo.jpg"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node --import tsx --test test/**/*.test.ts",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "vault",
+    "hashicorp",
+    "ebpf",
+    "secrets",
+    "node-vault",
+    "security"
+  ],
+  "author": "node-vault-ebpf contributors",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/antonymarion/node-vault-ebpf.git"
+  },
+  "bugs": {
+    "url": "https://github.com/antonymarion/node-vault-ebpf/issues"
+  },
+  "homepage": "https://github.com/antonymarion/node-vault-ebpf#readme",
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

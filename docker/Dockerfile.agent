@@ -1,0 +1,25 @@
+# syntax=docker/dockerfile:1
+FROM golang:1.22-bookworm AS bpf-build
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    clang llvm make libbpf-dev linux-libc-dev \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /src/bpf
+COPY bpf/ ./
+RUN bash compile.sh
+
+FROM golang:1.22-bookworm AS agent-build
+WORKDIR /src/agent
+COPY agent/go.mod agent/go.sum ./
+RUN go mod download
+COPY agent/ ./
+ENV CGO_ENABLED=0
+RUN go build -o /out/node-vault-ebpf-agent ./cmd/node-vault-ebpf-agent
+
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=agent-build /out/node-vault-ebpf-agent /usr/local/bin/node-vault-ebpf-agent
+COPY --from=bpf-build /src/bpf/rewrite.bpf.o /opt/node-vault-ebpf/rewrite.bpf.o
+ENV NVE_BPF_OBJECT=/opt/node-vault-ebpf/rewrite.bpf.o
+ENV NVE_SOCKET=/var/run/node-vault-ebpf.sock
+ENTRYPOINT ["/usr/local/bin/node-vault-ebpf-agent"]

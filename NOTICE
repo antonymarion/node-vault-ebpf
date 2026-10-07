@@ -1,0 +1,12 @@
+node-vault-ebpf
+Copyright (c) 2026 node-vault-ebpf contributors
+
+This project is inspired by the architectural idea described in public
+articles about Kloak (placeholder secrets rewritten in-kernel via eBPF).
+It is an independent implementation under the MIT license and does not
+contain code derived from spinningfactory/kloak (AGPL-3.0).
+
+The npm client API is intentionally compatible with node-vault
+(https://github.com/nodevault/node-vault), which is MIT-licensed.
+Compatibility does not imply affiliation with HashiCorp or the node-vault
+maintainers.

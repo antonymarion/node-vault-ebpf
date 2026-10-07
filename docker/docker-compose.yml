@@ -1,0 +1,65 @@
+services:
+  vault:
+    image: hashicorp/vault:1.17
+    cap_add: [IPC_LOCK]
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: root
+      VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
+    ports:
+      - "8200:8200"
+    healthcheck:
+      test: ["CMD", "vault", "status", "-address=http://127.0.0.1:8200"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  vault-init:
+    image: hashicorp/vault:1.17
+    depends_on:
+      vault:
+        condition: service_healthy
+    environment:
+      VAULT_ADDR: http://vault:8200
+      VAULT_TOKEN: root
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        vault secrets enable -path=secret kv-v2 || true
+        vault kv put secret/demo token=super-secret-bearer-token-12345
+        echo "vault seeded"
+
+  agent:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.agent
+    depends_on:
+      vault-init:
+        condition: service_completed_successfully
+    privileged: true
+    environment:
+      VAULT_ADDR: http://vault:8200
+      VAULT_TOKEN: root
+      NVE_SOCKET: /var/run/node-vault-ebpf.sock
+      NVE_BPF_OBJECT: /opt/node-vault-ebpf/rewrite.bpf.o
+    volumes:
+      - nve-sock:/var/run
+    command: ["-socket", "/var/run/node-vault-ebpf.sock"]
+
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.app
+    depends_on:
+      - agent
+    # Share PID namespace so the agent can attach uprobes to the Node process.
+    pid: "service:agent"
+    environment:
+      NVE_AGENT_SOCKET: /var/run/node-vault-ebpf.sock
+      VAULT_ADDR: http://vault:8200
+      DEMO_ALLOWED_HOST: httpbin.org
+      DEMO_BLOCKED_HOST: postman-echo.com
+    volumes:
+      - nve-sock:/var/run
+
+volumes:
+  nve-sock:

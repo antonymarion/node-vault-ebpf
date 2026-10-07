@@ -1,0 +1,9 @@
+{
+  "name": "basic-httpbin",
+  "private": true,
+  "version": "0.1.0",
+  "type": "commonjs",
+  "dependencies": {
+    "node-vault-ebpf": "*"
+  }
+}

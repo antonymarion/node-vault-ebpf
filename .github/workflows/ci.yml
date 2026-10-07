@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+
+  agent-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache-dependency-path: agent/go.sum
+      - name: Go unit tests
+        working-directory: agent
+        run: go test ./...
+
+  agent-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile BPF (bookworm container)
+        run: |
+          set -euo pipefail
+          docker run --rm -v "$PWD:/src" -w /src/bpf golang:1.22-bookworm bash -lc '
+            set -euo pipefail
+            apt-get update
+            DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+              clang llvm libbpf-dev linux-libc-dev
+            bash compile.sh
+          ' 2>&1 | tee bpf-compile.log
+          exit ${PIPESTATUS[0]}
+      - name: Upload BPF compile log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bpf-compile-log
+          path: bpf-compile.log
+          if-no-files-found: ignore
+      - name: Build agent image
+        run: docker build --progress=plain -f docker/Dockerfile.agent -t node-vault-ebpf-agent:ci .
+
