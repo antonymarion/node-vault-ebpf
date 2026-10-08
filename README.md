@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/logo.jpg" width="128" height="128" alt="node-vault-ebpf">
+  <img src="docs/logo.png" width="128" height="128" alt="node-vault-ebpf">
 </p>
 
 # node-vault-ebpf

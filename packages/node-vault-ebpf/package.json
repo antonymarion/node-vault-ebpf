@@ -19,7 +19,7 @@
     "README.md",
     "LICENSE",
     "logo.svg",
-    "logo.jpg"
+    "logo.png"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
